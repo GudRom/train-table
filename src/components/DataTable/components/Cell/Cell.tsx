@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { useAppDispatch } from "../../../../store/hooks";
 import {
   addNoValidData,
@@ -36,10 +36,10 @@ const Cell: FC<Props> = ({ characteristic, type }) => {
     dispatch(addNoValidData());
   };
 
-  useEffect(() => {
+  const setValid = () => {
     dispatch(removeNoValidData());
     setIsValid(true);
-  }, [dispatch, isValid]);
+  };
 
   return (
     <td>
@@ -49,6 +49,7 @@ const Cell: FC<Props> = ({ characteristic, type }) => {
         value={amount}
         onChange={(e) => setAmount(+e.currentTarget.value)}
         onBlur={validateAmount}
+        onFocus={setValid}
       />
     </td>
   );
