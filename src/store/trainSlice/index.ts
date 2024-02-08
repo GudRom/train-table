@@ -36,7 +36,7 @@ const TrainSlice = createSliceWithThunks({
     }>();
     return {
       setCurrentTrain: create.reducer(
-        (state, action: PayloadAction<TrainModel>) => {
+        (state, action: PayloadAction<TrainModel | null>) => {
           state.currentTrain = action.payload;
         }
       ),
@@ -90,11 +90,8 @@ const TrainSlice = createSliceWithThunks({
   },
 });
 
-export const {
-  fetchTrainsData,
-  setCurrentTrain,
-  editCurrentTrainData,
-} = TrainSlice.actions;
+export const { fetchTrainsData, setCurrentTrain, editCurrentTrainData } =
+  TrainSlice.actions;
 
 export default TrainSlice.reducer;
 

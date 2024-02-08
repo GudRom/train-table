@@ -3,11 +3,14 @@ import Header from "./components/Header";
 import TrainTable from "./components/TrainTable";
 import DataTable from "./components/DataTable";
 import Box from "./components/Box";
-import { useAppSelector } from "./store/hooks";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { FormEvent } from "react";
 import { TrainCharacteristicModel } from "./types/TrainCharacteristic";
+import { setCurrentTrain } from "./store/trainSlice";
 
 function App() {
+  const dispatch = useAppDispatch();
+
   const currentTrain = useAppSelector(
     (state) => state.trainReducer.currentTrain
   );
@@ -17,6 +20,7 @@ function App() {
       .map((el) => el.speed.amount)
       .sort((a, b) => a - b);
     console.log(sortSpeed);
+    dispatch(setCurrentTrain(null));
   };
 
   const findNoValid = (el: TrainCharacteristicModel): boolean => {
