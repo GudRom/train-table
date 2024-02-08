@@ -6,19 +6,19 @@ import {
 } from "@reduxjs/toolkit";
 import { getTrainsData } from "../../api";
 import { TrainData, TrainModel } from "../../types/Train";
+import { EditCharacteristicDto } from "../../types/EditCharacteristicDto";
+import { TrainCharacteristic } from "../../types/TrainCharacteristic";
 
 type TrainState = {
   trains: TrainModel[];
   currentTrain: TrainModel | null;
   error: SerializedError | null;
   loading: boolean;
-  noValidDataCount: number;
 };
 
 const TrainInitState: TrainState = {
   trains: [],
   currentTrain: null,
-  noValidDataCount: 0,
   error: null,
   loading: false,
 };
@@ -40,12 +40,28 @@ const TrainSlice = createSliceWithThunks({
           state.currentTrain = action.payload;
         }
       ),
-      addNoValidData: create.reducer((state) => {
-        state.noValidDataCount += 1;
-      }),
-      removeNoValidData: create.reducer((state) => {
-        if (state.noValidDataCount > 0) state.noValidDataCount -= 1;
-      }),
+      editCurrentTrainData: create.reducer(
+        (state, action: PayloadAction<EditCharacteristicDto>) => {
+          const { amount, charId, type } = action.payload;
+          if (state.currentTrain) {
+            const currentCharact = state.currentTrain.characteristics.find(
+              (el) => el.id === charId
+            );
+            if (currentCharact) {
+              const newCharact = {
+                ...currentCharact,
+                [type]: { amount, isValid: validateAmount(type, amount) },
+              };
+              state.currentTrain = {
+                ...state.currentTrain,
+                characteristics: state.currentTrain.characteristics.map((el) =>
+                  el.id === charId ? newCharact : el
+                ),
+              };
+            }
+          }
+        }
+      ),
       fetchTrainsData: createAThunk<TrainData[]>(
         async (_, { rejectWithValue }) => {
           try {
@@ -60,20 +76,7 @@ const TrainSlice = createSliceWithThunks({
             state.loading = true;
           },
           fulfilled: (state, action) => {
-            state.trains = action.payload.map(
-              (el) =>
-                ({
-                  id: Math.trunc(Math.random() * 10 ** 5),
-                  name: el.name,
-                  description: el.description,
-                  characteristics: el.characteristics.map((el) => ({
-                    id: Math.trunc(Math.random() * 10 ** 5),
-                    speed: el.speed,
-                    force: el.force,
-                    engineAmperage: el.engineAmperage,
-                  })),
-                } as TrainModel)
-            );
+            state.trains = normolizeData(action.payload);
           },
           rejected: (state, action) => {
             state.error = action.error;
@@ -90,8 +93,47 @@ const TrainSlice = createSliceWithThunks({
 export const {
   fetchTrainsData,
   setCurrentTrain,
-  addNoValidData,
-  removeNoValidData,
+  editCurrentTrainData,
 } = TrainSlice.actions;
 
 export default TrainSlice.reducer;
+
+const normolizeData = (arr: TrainData[]): TrainModel[] => {
+  return arr.map(
+    (el) =>
+      ({
+        id: Math.trunc(Math.random() * 10 ** 5),
+        name: el.name,
+        description: el.description,
+        characteristics: el.characteristics.map((el) => ({
+          id: Math.trunc(Math.random() * 10 ** 5),
+          speed: { amount: el.speed, isValid: true },
+          force: { amount: el.force, isValid: true },
+          engineAmperage: {
+            amount: el.engineAmperage,
+            isValid: true,
+          },
+        })),
+      } as TrainModel)
+  );
+};
+
+const validateAmount = (
+  type: keyof TrainCharacteristic,
+  amount: number
+): boolean => {
+  let flag = true;
+  switch (type) {
+    case "engineAmperage":
+      !(Number.isInteger(amount) && amount > 0) && (flag = false);
+      break;
+    case "force":
+      (Number.isInteger(amount) || amount < 1) && (flag = false);
+      break;
+
+    case "speed":
+      !(Number.isInteger(amount) && amount >= 0) && (flag = false);
+      break;
+  }
+  return flag;
+};

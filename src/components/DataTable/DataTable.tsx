@@ -13,7 +13,6 @@ const CHARACTERISTICS_HEADERS = [
 ];
 
 const DataTable = ({ currentTrain }: Props) => {
-  console.log("render");
   return (
     <table>
       <caption className="text-left">Характеристики</caption>
@@ -22,9 +21,21 @@ const DataTable = ({ currentTrain }: Props) => {
       <tbody>
         {currentTrain.characteristics.map((charact) => (
           <tr key={charact.id}>
-            <Cell type="withoutzero" characteristic={charact.engineAmperage} />
-            <Cell type="withdote" characteristic={charact.force} />
-            <Cell type="withzero" characteristic={charact.speed} />
+            <Cell
+              characteristic={charact.engineAmperage}
+              type={"engineAmperage"}
+              id={charact.id}
+            />
+            <Cell
+              characteristic={charact.force}
+              type={"force"}
+              id={charact.id}
+            />
+            <Cell
+              characteristic={charact.speed}
+              type={"speed"}
+              id={charact.id}
+            />
           </tr>
         ))}
       </tbody>

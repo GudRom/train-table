@@ -5,6 +5,7 @@ import DataTable from "./components/DataTable";
 import Box from "./components/Box";
 import { useAppSelector } from "./store/hooks";
 import { FormEvent } from "react";
+import { TrainCharacteristicModel } from "./types/TrainCharacteristic";
 
 function App() {
   const currentTrain = useAppSelector(
@@ -13,12 +14,23 @@ function App() {
   const formSubmit = (e: FormEvent) => {
     e.preventDefault();
     const sortSpeed = currentTrain?.characteristics
-      .map((el) => el.speed)
+      .map((el) => el.speed.amount)
       .sort((a, b) => a - b);
     console.log(sortSpeed);
   };
-  const noValidData = useAppSelector((state) => state.trainReducer.noValidDataCount);
-  console.log(noValidData);
+
+  const findNoValid = (el: TrainCharacteristicModel): boolean => {
+    const validSpeed = el.speed.isValid;
+    const validEngineAmperage = el.engineAmperage.isValid;
+    const validforce = el.force.isValid;
+
+    return validEngineAmperage && validSpeed && validforce;
+  };
+
+  const isValid = currentTrain?.characteristics
+    .map((el) => findNoValid(el))
+    .reduce((prev, cur) => prev && cur);
+
   return (
     <>
       <Header />
@@ -31,7 +43,7 @@ function App() {
             <form onSubmit={formSubmit}>
               <DataTable currentTrain={currentTrain} />
               <button
-                disabled={!!noValidData}
+                disabled={!isValid}
                 type="submit"
                 className="px-2 py-1 bg-emerald-400 rounded-md mt-2 disabled:opacity-50"
               >

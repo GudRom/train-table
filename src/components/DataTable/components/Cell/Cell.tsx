@@ -1,58 +1,48 @@
-import { FC, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { FC, memo, useState } from "react";
 import { useAppDispatch } from "../../../../store/hooks";
 import {
-  addNoValidData,
-  removeNoValidData,
+  editCurrentTrainData,
 } from "../../../../store/trainSlice";
+import {
+  CharactrecticWithFlag,
+  TrainCharacteristic,
+} from "../../../../types/TrainCharacteristic";
 
 type Props = {
-  characteristic: number;
-  type: "withdote" | "withoutzero" | "withzero";
+  characteristic: CharactrecticWithFlag;
+  type: keyof TrainCharacteristic;
+  id: number;
 };
 
-const Cell: FC<Props> = ({ characteristic, type }) => {
-  const [amount, setAmount] = useState<number>(characteristic);
-  const [isValid, setIsValid] = useState(true);
+const Cell: FC<Props> = ({ characteristic, type, id }) => {
+  const [amount, setAmount] = useState<number>(characteristic.amount);
 
   const dispatch = useAppDispatch();
 
-  const validateAmount = () => {
-    switch (type) {
-      case "withdote":
-        Number.isInteger(amount) && amount <= 0 && setNoValid();
-        break;
-      case "withoutzero":
-        !(Number.isInteger(amount) && amount > 0) && setNoValid();
-        break;
-
-      case "withzero":
-        !(Number.isInteger(amount) && amount >= 0) && setNoValid();
-        break;
-    }
-  };
-
-  const setNoValid = () => {
-    setIsValid(false);
-    dispatch(addNoValidData());
-  };
-
-  const setValid = () => {
-    dispatch(removeNoValidData());
-    setIsValid(true);
+  const updateStoreData = () => {
+    dispatch(
+      editCurrentTrainData({
+        charId: id,
+        type,
+        amount,
+      })
+    );
   };
 
   return (
     <td>
       <input
-        className={`text-center ${isValid ? "text-inherit" : "text-red-600"}`}
+        className={`text-center focus:outline-none ${
+          characteristic.isValid ? "text-inherit" : "text-red-600"
+        }`}
         type="number"
         value={amount}
         onChange={(e) => setAmount(+e.currentTarget.value)}
-        onBlur={validateAmount}
-        onFocus={setValid}
+        onBlur={updateStoreData}
       />
     </td>
   );
 };
 
-export default Cell;
+export default memo(Cell);

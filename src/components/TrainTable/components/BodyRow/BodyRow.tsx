@@ -16,7 +16,7 @@ const BodyRow: FC<Props> = ({ train }) => {
   };
 
   return (
-    <tr onClick={handleClick}>
+    <tr onClick={handleClick} className='hover:cursor-pointer hover:bg-emerald-50'>
       <td>{train.name}</td>
       <td>{train.description}</td>
     </tr>
